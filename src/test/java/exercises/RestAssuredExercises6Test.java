@@ -10,6 +10,7 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
@@ -42,13 +43,21 @@ public class RestAssuredExercises6Test {
 		 * Store the user id in a variable of type int
 		 ******************************************************/
 
-		int userId;
+		int userId =
+		given().
+			spec(requestSpec).
+		when().
+			get("/users").
+		then().
+			extract().
+			path("find{it.username=='Karianne'}.id");
+			
 
 		/*******************************************************
 		 * Use a JUnit assertEquals to verify that the userId
 		 * is equal to 4
 		 ******************************************************/
-
+		Assert.assertEquals(4, userId);
 
 		/*******************************************************
 		 * Perform a GET to /albums and extract all albums that
@@ -59,13 +68,19 @@ public class RestAssuredExercises6Test {
 		 * Store these in a variable of type List<Integer>.
 		 ******************************************************/
 
-		List<Integer> albumIds;
+		List<Integer> albumIds =
+				given().
+					spec(requestSpec).
+				when().
+					get("/albums").
+				then().
+					extract().path(String.format("findAll{it.userId==%d}.id",userId));
 
 		/*******************************************************
 		 * Use a JUnit assertEquals to verify that the list has
 		 * exactly 10 items (hint: use the size() method)
 		 ******************************************************/
-
+		Assert.assertEquals(10, albumIds.size());
 
 		/*******************************************************
 		 * Perform a GET to /albums/XYZ/photos, where XYZ is the
@@ -80,7 +95,14 @@ public class RestAssuredExercises6Test {
 		 * (the accepted answer should help you solve this one).
 		 ******************************************************/
 
-		List<Photo> photos;
+		List<Photo> photos =
+				Arrays.asList(				
+				given().
+					spec(requestSpec).
+					pathParam("XYZ", albumIds.get(4)).
+				when().
+					get("/albums/{XYZ}/photos").
+					as(Photo[].class));
 
 		/*******************************************************
 		 * Use a JUnit assertEquals to verify that the title of
@@ -89,6 +111,6 @@ public class RestAssuredExercises6Test {
 		 * Hint: use the get() method to retrieve an object with a
 		 * specific index from a List
 		 ******************************************************/
-
+		Assert.assertEquals("pariatur sunt eveniet", photos.get(31).getTitle());
 	}
 }

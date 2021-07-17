@@ -39,7 +39,11 @@ public class RestAssuredExercises3Test {
 
 	@BeforeClass
 	public static void createResponseSpecification() {
-
+		responseSpec = new ResponseSpecBuilder().
+						expectStatusCode(200).
+						expectContentType(ContentType.JSON).
+						expectBody("country", equalTo("United States")).
+						build();
 	}
 
 	/*******************************************************
@@ -59,7 +63,11 @@ public class RestAssuredExercises3Test {
 		given().
 			spec(requestSpec).
 		when().
-		then();
+			get("/us/90210").
+		then().
+			spec(responseSpec).
+		and().
+			assertThat().body("'country abbreviation'", equalTo("US"));
 	}
 
 	/*******************************************************
@@ -74,12 +82,14 @@ public class RestAssuredExercises3Test {
 	@Test
 	public void extractCountryFromResponse() {
 
-		String actualCountry = "";
-
+		String actualCountry = 
 			given().
 				spec(requestSpec).
 			when().
-			then();
+				get("/us/90210").
+			then().
+				extract().
+				path("country");
 
 		Assert.assertEquals("United States", actualCountry);
 	}
